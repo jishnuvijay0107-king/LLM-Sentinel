@@ -1,0 +1,9 @@
+services:
+  llm-sentinel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: llm-sentinel
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
