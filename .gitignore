@@ -1,0 +1,28 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Pytest
+.pytest_cache/
+
+# Environment variables
+.env
+.env.*
+
+# Streamlit
+.streamlit/
+
+# Generated logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
