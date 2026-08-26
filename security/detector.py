@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import re
 
 
 @dataclass
@@ -8,11 +9,23 @@ class ThreatDetection:
     reason: str
 
 
-def _contains_any(text: str, patterns: list[str]) -> str | None:
-    """Return the first matching pattern."""
+def _normalize_for_detection(text: str) -> str:
+    """
+    Normalize text for rule-based security detection.
+
+    This is intentionally lightweight. Full Unicode normalization
+    is handled by the normalizer layer.
+    """
+    return " ".join(text.lower().split())
+
+
+def _find_pattern(text: str, patterns: list[str]) -> str | None:
+    """
+    Return the first matching security pattern.
+    """
 
     for pattern in patterns:
-        if pattern in text:
+        if re.search(pattern, text, flags=re.IGNORECASE):
             return pattern
 
     return None
@@ -20,67 +33,87 @@ def _contains_any(text: str, patterns: list[str]) -> str | None:
 
 def detect_prompt_injection(prompt: str) -> list[ThreatDetection]:
     """
-    Detect potential prompt injection patterns.
+    Detect common prompt-injection and instruction-manipulation patterns.
 
     Detection categories:
     - instruction manipulation
     - prompt extraction
     - role manipulation
+    - policy bypass
 
-    This is the rule-based detection layer.
+    This is a deterministic rule-based detection layer.
     """
 
     detections: list[ThreatDetection] = []
 
-    text = " ".join(prompt.lower().split())
+    text = _normalize_for_detection(prompt)
 
     patterns = {
         "instruction_manipulation": [
-            "ignore previous instructions",
-            "ignore all previous instructions",
-            "ignore the previous instructions",
-            "disregard previous instructions",
-            "disregard the previous instructions",
-            "disregard the instructions above",
-            "forget previous instructions",
-            "forget the instructions above",
-            "override previous instructions",
-            "replace the instructions above",
+            r"\bignore\s+(all\s+)?previous\s+instructions\b",
+            r"\bignore\s+(the\s+)?previous\s+instructions\b",
+            r"\bdisregard\s+(all\s+)?previous\s+instructions\b",
+            r"\bdisregard\s+(the\s+)?instructions\s+(above|earlier)\b",
+            r"\bforget\s+(all\s+)?previous\s+instructions\b",
+            r"\bforget\s+(the\s+)?instructions\s+(above|earlier)\b",
+            r"\boverride\s+(the\s+)?previous\s+instructions\b",
+            r"\breplace\s+(the\s+)?instructions\s+(above|earlier)\b",
+            r"\bnew\s+instructions\s*:",
+            r"\bfrom\s+now\s+on\s*,?\s+ignore\b",
         ],
 
         "prompt_extraction": [
-            "reveal your system prompt",
-            "reveal the system prompt",
-            "reveal the system instructions",
-            "show your system prompt",
-            "show the system prompt",
-            "show your system instructions",
-            "tell me your system prompt",
-            "tell me the system prompt",
-            "hidden instructions",
-            "hidden system instructions",
-            "instructions controlling your behavior",
+            r"\breveal\s+(your\s+)?system\s+prompt\b",
+            r"\breveal\s+(the\s+)?system\s+instructions\b",
+            r"\bshow\s+(your\s+)?system\s+prompt\b",
+            r"\bshow\s+(the\s+)?system\s+instructions\b",
+            r"\btell\s+me\s+(your\s+)?system\s+prompt\b",
+            r"\bprint\s+(your\s+)?system\s+prompt\b",
+            r"\bdisplay\s+(your\s+)?system\s+prompt\b",
+            r"\bwhat\s+are\s+your\s+hidden\s+instructions\b",
+            r"\bhidden\s+(system\s+)?instructions\b",
+            r"\binstructions\s+controlling\s+your\s+behavior\b",
         ],
 
         "role_manipulation": [
-            "you are now",
-            "you are operating as",
-            "act as system",
-            "act as the system",
-            "pretend you are the system",
-            "operate as the system",
+            r"\byou\s+are\s+now\s+(a|an|the)\b",
+            r"\byou\s+are\s+operating\s+as\b",
+            r"\bact\s+as\s+(a|an|the)?\s*system\b",
+            r"\bpretend\s+you\s+are\s+(a|an|the)?\s*system\b",
+            r"\boperate\s+as\s+(a|an|the)?\s*system\b",
+            r"\broleplay\s+as\s+(a|an|the)?\s*system\b",
+        ],
+
+        "policy_bypass": [
+            r"\bbypass\s+(your\s+)?safety\s+(rules|policies|filters)\b",
+            r"\bdisable\s+(your\s+)?safety\s+(rules|policies|filters)\b",
+            r"\bignore\s+(your\s+)?safety\s+(rules|policies|filters)\b",
+            r"\bdisable\s+your\s+restrictions\b",
+            r"\bremove\s+your\s+restrictions\b",
+            r"\bignore\s+your\s+content\s+policy\b",
+            r"\bdo\s+not\s+follow\s+(your\s+)?safety\s+rules\b",
         ],
     }
 
-    for category, keywords in patterns.items():
+    confidence_by_category = {
+        "instruction_manipulation": 0.90,
+        "prompt_extraction": 0.90,
+        "role_manipulation": 0.85,
+        "policy_bypass": 0.90,
+    }
 
-        match = _contains_any(text, keywords)
+    for category, category_patterns in patterns.items():
+
+        match = _find_pattern(
+            text,
+            category_patterns,
+        )
 
         if match:
             detections.append(
                 ThreatDetection(
                     category=category,
-                    confidence=0.90,
+                    confidence=confidence_by_category[category],
                     reason=f"Detected suspicious pattern: {match}",
                 )
             )

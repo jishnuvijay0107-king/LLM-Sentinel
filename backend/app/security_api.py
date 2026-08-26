@@ -29,35 +29,38 @@ def analyze_prompt(request: SecurityAnalysisRequest):
     and character-level obfuscation.
     """
 
-    # 1. Normalize input
-    normalized_prompt = normalize_text(request.prompt)
+    # Keep the original prompt for obfuscation detection.
+    original_prompt = request.prompt
 
-    # 2. Detect prompt injection
+    # Normalize only for semantic prompt-injection detection.
+    normalized_prompt = normalize_text(original_prompt)
+
+    # 1. Detect prompt injection on normalized text
     injection_detections = detect_prompt_injection(
         normalized_prompt
     )
 
-    # 3. Detect obfuscation
+    # 2. Detect obfuscation on ORIGINAL text
     obfuscation_detections = detect_obfuscation(
-        normalized_prompt
+        original_prompt
     )
 
-    # 4. Combine all detections
+    # 3. Combine all detections
     detections = (
         injection_detections
         + obfuscation_detections
     )
 
-    # 5. Calculate risk score
+    # 4. Calculate risk score
     risk_score = calculate_risk(detections)
 
-    # 6. Determine risk level
+    # 5. Determine risk level
     risk_level = get_risk_level(risk_score)
 
-    # 7. Make security decision
+    # 6. Make security decision
     decision = make_decision(risk_score)
 
-    # 8. Convert detections to API format
+    # 7. Convert detections to API format
     response_detections = [
         {
             "category": detection.category,
@@ -67,16 +70,18 @@ def analyze_prompt(request: SecurityAnalysisRequest):
         for detection in detections
     ]
 
-    # 9. Write security audit event
-    log_security_event(
+    # 8. Write security audit event
+    event = log_security_event(
         risk_score=risk_score,
         risk_level=risk_level,
         decision=decision,
         detections=response_detections,
     )
 
-    # 10. Return API response
+    # 9. Return security analysis response
     return SecurityAnalysisResponse(
+        event_id=event["event_id"],
+        timestamp=event["timestamp"],
         risk_score=risk_score,
         risk_level=risk_level,
         decision=decision,

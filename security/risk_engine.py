@@ -2,20 +2,17 @@ from security.detector import ThreatDetection
 from security.obfuscation_detector import ObfuscationDetection
 
 
-# Both detector result types are accepted by the risk engine.
 Detection = ThreatDetection | ObfuscationDetection
 
 
-# Risk contribution of each detection category.
 CATEGORY_WEIGHTS = {
     "instruction_manipulation": 35,
     "prompt_extraction": 30,
     "role_manipulation": 25,
-    "unicode_control_character": 30,
+    "unicode_control_character": 40,
 }
 
 
-# Categories considered especially dangerous.
 HIGH_RISK_CATEGORIES = {
     "instruction_manipulation",
     "prompt_extraction",
@@ -45,8 +42,6 @@ def calculate_risk(detections: list[Detection]) -> int:
 
         score += weight * detection.confidence
 
-    # Multiple high-risk categories indicate
-    # a stronger prompt-injection attempt.
     high_risk_count = sum(
         1
         for detection in detections
