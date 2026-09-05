@@ -63,13 +63,13 @@ def detect_prompt_injection(prompt: str) -> list[ThreatDetection]:
         ],
 
         "prompt_extraction": [
-            r"\breveal\s+(your\s+)?system\s+prompt\b",
-            r"\breveal\s+(the\s+)?system\s+instructions\b",
-            r"\bshow\s+(your\s+)?system\s+prompt\b",
-            r"\bshow\s+(the\s+)?system\s+instructions\b",
-            r"\btell\s+me\s+(your\s+)?system\s+prompt\b",
-            r"\bprint\s+(your\s+)?system\s+prompt\b",
-            r"\bdisplay\s+(your\s+)?system\s+prompt\b",
+            r"\breveal\s+(your\s+|the\s+)?system\s+prompt\b",
+            r"\breveal\s+(your\s+|the\s+)?system\s+instructions\b",
+            r"\bshow\s+(your\s+|the\s+)?system\s+prompt\b",
+            r"\bshow\s+(your\s+|the\s+)?system\s+instructions\b",
+            r"\btell\s+me\s+(your\s+|the\s+)?system\s+prompt\b",
+            r"\bprint\s+(your\s+|the\s+)?system\s+prompt\b",
+            r"\bdisplay\s+(your\s+|the\s+)?system\s+prompt\b",
             r"\bwhat\s+are\s+your\s+hidden\s+instructions\b",
             r"\bhidden\s+(system\s+)?instructions\b",
             r"\binstructions\s+controlling\s+your\s+behavior\b",
@@ -103,13 +103,25 @@ def detect_prompt_injection(prompt: str) -> list[ThreatDetection]:
     }
 
     for category, category_patterns in patterns.items():
-
         match = _find_pattern(
             text,
             category_patterns,
         )
 
         if match:
+            # Avoid treating clearly descriptive/documentation
+            # language as an active instruction.
+            if (
+                category == "instruction_manipulation"
+                and (
+                    "this article explains" in text
+                    or "this document explains" in text
+                    or "the article explains" in text
+                    or "the document explains" in text
+                )
+            ):
+                continue
+
             detections.append(
                 ThreatDetection(
                     category=category,
