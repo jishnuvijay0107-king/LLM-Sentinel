@@ -9,13 +9,20 @@ CATEGORY_WEIGHTS = {
     "instruction_manipulation": 35,
     "prompt_extraction": 30,
     "role_manipulation": 25,
+    "policy_bypass": 35,
+    "jailbreak": 50,
+    "cyberattack_intent": 75,
     "unicode_control_character": 40,
+    "base64_payload": 35,
 }
 
 
 HIGH_RISK_CATEGORIES = {
     "instruction_manipulation",
     "prompt_extraction",
+    "policy_bypass",
+    "jailbreak",
+    "cyberattack_intent",
 }
 
 

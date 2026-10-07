@@ -1,0 +1,63 @@
+{
+    "generated_at": "2026-10-08T00:09:47.196143+05:30",
+    "dataset": {
+        "total_cases": 44,
+        "attack_cases": 34,
+        "benign_cases": 10
+    },
+    "confusion_matrix": {
+        "true_positive": 34,
+        "true_negative": 10,
+        "false_positive": 0,
+        "false_negative": 0
+    },
+    "security_performance": {
+        "detection_rate": 100.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "accuracy": 100.0
+    },
+    "category_metrics": {
+        "base64_payload": {
+            "expected": 0,
+            "detected": 1,
+            "detection_rate": 0
+        },
+        "cyberattack_intent": {
+            "expected": 2,
+            "detected": 2,
+            "detection_rate": 100.0
+        },
+        "instruction_manipulation": {
+            "expected": 12,
+            "detected": 11,
+            "detection_rate": 91.66666666666666
+        },
+        "policy_bypass": {
+            "expected": 6,
+            "detected": 6,
+            "detection_rate": 100.0
+        },
+        "prompt_extraction": {
+            "expected": 10,
+            "detected": 9,
+            "detection_rate": 90.0
+        },
+        "role_manipulation": {
+            "expected": 7,
+            "detected": 7,
+            "detection_rate": 100.0
+        },
+        "unicode_control_character": {
+            "expected": 3,
+            "detected": 3,
+            "detection_rate": 100.0
+        }
+    },
+    "robustness": {
+        "total_cases": 21,
+        "passed": 21,
+        "failed": 0,
+        "pass_rate": 100.0
+    }
+}

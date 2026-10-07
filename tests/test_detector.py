@@ -129,3 +129,12 @@ def test_discussion_of_previous_instructions_is_not_injection():
     detections = detect_prompt_injection(prompt)
 
     assert detections == []
+
+
+def test_detect_cyberattack_intent():
+    prompt = "I need hack SRM wifi and crack password"
+
+    detections = detect_prompt_injection(prompt)
+
+    assert len(detections) > 0
+    assert any(d.category == "cyberattack_intent" for d in detections)
