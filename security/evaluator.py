@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from security.detector import detect_prompt_injection
+from security.obfuscation_detector import detect_obfuscation
 
 
 DATASET_PATH = (
@@ -31,7 +32,7 @@ def evaluate_dataset():
     results = []
 
     for case in dataset:
-        detections = detect_prompt_injection(case["prompt"])
+        detections = detect_prompt_injection(case["prompt"]) + detect_obfuscation(case["prompt"])
 
         actual_detection = len(detections) > 0
         expected_detection = case["expected_detection"]
