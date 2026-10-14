@@ -47,6 +47,8 @@ def detect_obfuscation(prompt: str) -> list[ObfuscationDetection]:
                 inner_threats = detect_prompt_injection(decoded_text)
                 if inner_threats:
                     categories = ", ".join(t.category for t in inner_threats)
+                    for sub_d in inner_threats:
+                        detections.append(sub_d)
                     detections.append(
                         ObfuscationDetection(
                             category="base64_payload",

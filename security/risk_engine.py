@@ -10,7 +10,7 @@ CATEGORY_WEIGHTS = {
     "prompt_extraction": 30,
     "role_manipulation": 25,
     "policy_bypass": 35,
-    "jailbreak": 50,
+    "jailbreak": 70,
     "cyberattack_intent": 75,
     "unicode_control_character": 40,
     "base64_payload": 35,

@@ -62,7 +62,7 @@ def _generate_assistant_response(prompt: str) -> str:
     "/analyze",
     response_model=SecurityAnalysisResponse,
 )
-@limiter.limit("60/minute")
+@limiter.limit("1200/minute")
 def analyze_prompt(
     request: Request,
     analysis_request: SecurityAnalysisRequest,
@@ -137,7 +137,7 @@ def analyze_prompt(
     "/chat",
     response_model=GuardedChatResponse,
 )
-@limiter.limit("60/minute")
+@limiter.limit("300/minute")
 def guarded_chat(
     request: Request,
     chat_request: GuardedChatRequest,

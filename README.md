@@ -87,18 +87,26 @@ GROQ_API_KEY=your_groq_api_key
 ```
 *(If no API keys are provided, LLM-Sentinel seamlessly runs in offline mode using the Built-in Dynamic Engine!)*
 
-### 3. Run FastAPI Gateway
-```bash
-uvicorn backend.app.main:app --host 127.0.0.1 --port 8001 --reload
-```
-API Documentation will be live at: `http://localhost:8001/docs`
+### 3. One-Click System Launch (Recommended)
+You can launch both the FastAPI Gateway and the Cinematic SOC Dashboard with a single command:
+* **Windows**: Double-click `start.bat` or run:
+  ```cmd
+  start.bat
+  ```
+* **Linux / macOS**:
+  ```bash
+  chmod +x start.sh && ./start.sh
+  ```
 
-### 4. Launch Streamlit Security SOC Dashboard
-In a separate terminal:
+Alternatively, run manually:
 ```bash
+# Terminal 1: FastAPI Gateway
+uvicorn backend.app.main:app --host 127.0.0.1 --port 8001 --reload
+
+# Terminal 2: Streamlit Dashboard
 streamlit run dashboard/app.py
 ```
-Dashboard will open at: `http://localhost:8501`
+Dashboard opens automatically at: `http://localhost:8501`
 
 ---
 
@@ -118,16 +126,19 @@ Access:
 
 ## 🧪 Testing & Evaluation
 
-Run the automated test suite with full coverage:
+Run the automated test suite and live latency benchmark:
 
 ```bash
-# Run 28 Unit & Integration Tests (100% Pass Rate)
+# 1. Run 28 Unit & Integration Tests (100% Pass Rate)
 pytest -v
 
-# Run Security Benchmark Evaluation
+# 2. Run Real-Time Perimeter Latency & Throughput Benchmark
+python benchmark.py
+
+# 3. Run Security Benchmark Evaluation
 python -m tests.run_evaluation
 
-# Run Adversarial Robustness Evaluation
+# 4. Run Adversarial Robustness Evaluation
 python -m tests.run_adversarial_evaluation
 ```
 

@@ -100,6 +100,8 @@ def detect_prompt_injection(prompt: str) -> list[ThreatDetection]:
             r"\boperate\s+as\s+(a|an|the)?\s*system\b",
 
             r"\broleplay\s+as\s+(a|an|the)?\s*system\b",
+
+            r"\b(act|pretend|roleplay)\s+(as|you\s+are)\s+(a|an|the\s+)?(system\s+)?(admin|administrator|root|developer)\b",
         ],
 
         "policy_bypass": [
@@ -108,6 +110,8 @@ def detect_prompt_injection(prompt: str) -> list[ThreatDetection]:
             r"\bdisable\s+(your\s+)?safety\s+(rules|policies|filters)\b",
 
             r"\bignore\s+(your\s+)?safety\s+(rules|policies|filters)\b",
+
+            r"\bdisregard\s+(your\s+)?safety\s+(rules|policies|filters)\b",
 
             r"\bdisable\s+your\s+restrictions\b",
 
