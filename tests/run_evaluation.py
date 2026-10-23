@@ -16,6 +16,8 @@ def main():
     print(f"Precision        : {report['precision']:.2%}")
     print(f"Recall           : {report['recall']:.2%}")
     print(f"F1 Score         : {report['f1_score']:.2%}")
+    print(f"Attack Containment: {report['containment_rate']:.2%}")
+    print(f"Benign Withheld  : {report['benign_withheld']}")
 
     print("\n=== Case Results ===\n")
 
@@ -25,6 +27,9 @@ def main():
             f"{result['category']:25} "
             f"{result['result']}"
         )
+
+    if report["false_positive"] or report["false_negative"] or report["benign_withheld"] or report["containment_rate"] < 1:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

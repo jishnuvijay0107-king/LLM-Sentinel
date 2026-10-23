@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 .git/
 .github/
-.streamlit/
+.streamlit/*
+!.streamlit/config.toml
 .env
 *.log

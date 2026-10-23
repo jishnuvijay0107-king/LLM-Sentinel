@@ -4,7 +4,10 @@ from pathlib import Path
 from uuid import uuid4
 
 
-LOG_DIR = Path("logs")
+import os
+
+
+LOG_DIR = Path(os.getenv("SENTINEL_LOG_DIR", str(Path(__file__).resolve().parent.parent / "logs")))
 LOG_FILE = LOG_DIR / "security_events.jsonl"
 
 

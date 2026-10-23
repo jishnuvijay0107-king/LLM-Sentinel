@@ -12,6 +12,8 @@ CATEGORY_WEIGHTS = {
     "policy_bypass": 35,
     "jailbreak": 70,
     "cyberattack_intent": 75,
+    "harmful_illegal_content": 90,
+    "financial_crime": 75,
     "unicode_control_character": 40,
     "base64_payload": 35,
 }
@@ -23,6 +25,8 @@ HIGH_RISK_CATEGORIES = {
     "policy_bypass",
     "jailbreak",
     "cyberattack_intent",
+    "harmful_illegal_content",
+    "financial_crime",
 }
 
 
@@ -39,6 +43,15 @@ def calculate_risk(detections: list[Detection]) -> int:
     if not detections:
         return 0
 
+    # Repeated characters or the same rule in an encoded and plain payload
+    # are one signal, rather than independent evidence.
+    by_category = {}
+    for detection in detections:
+        previous = by_category.get(detection.category)
+        if previous is None or detection.confidence > previous.confidence:
+            by_category[detection.category] = detection
+
+    detections = list(by_category.values())
     score = 0.0
 
     for detection in detections:
@@ -57,6 +70,13 @@ def calculate_risk(detections: list[Detection]) -> int:
 
     if high_risk_count >= 2:
         score += 30
+
+    # A clear extraction/override must not be allowed just because it is the
+    # only signal. Lower-confidence evidence remains subject to review.
+    if any(d.category in HIGH_RISK_CATEGORIES and d.confidence >= 0.85 for d in detections):
+        score = max(score, 60)
+    elif detections:
+        score = max(score, 30)
 
     return min(int(score), 100)
 

@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 
 from evaluation.dataset import EVALUATION_CASES, EvaluationCase
-from security.detector import detect_prompt_injection
-from security.obfuscation_detector import detect_obfuscation
+from security.inspection import inspect_prompt
 
 
 @dataclass
@@ -15,15 +14,12 @@ class EvaluationResult:
 
 
 def evaluate_case(case: EvaluationCase) -> EvaluationResult:
-    injection_detections = detect_prompt_injection(case.prompt)
-    obfuscation_detections = detect_obfuscation(case.prompt)
-
-    detections = injection_detections + obfuscation_detections
+    detections = inspect_prompt(case.prompt)["detections"]
 
     actual_categories = tuple(
         sorted(
             {
-                detection.category
+                detection["category"]
                 for detection in detections
             }
         )

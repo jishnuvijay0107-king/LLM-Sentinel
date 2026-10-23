@@ -43,8 +43,9 @@ def detect_obfuscation(prompt: str) -> list[ObfuscationDetection]:
             decoded_text = decoded_bytes.decode("utf-8", errors="ignore")
             if len(decoded_text) >= 8 and any(c.isalpha() for c in decoded_text):
                 from security.detector import detect_prompt_injection
+                from security.normalizer import normalize_text
 
-                inner_threats = detect_prompt_injection(decoded_text)
+                inner_threats = detect_prompt_injection(normalize_text(decoded_text))
                 if inner_threats:
                     categories = ", ".join(t.category for t in inner_threats)
                     for sub_d in inner_threats:

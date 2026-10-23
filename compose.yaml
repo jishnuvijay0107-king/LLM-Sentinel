@@ -1,25 +1,16 @@
 services:
-  gateway:
+  sentinel:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: llm-sentinel-gateway
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8501:8000"
+      - "127.0.0.1:8001:8000"
     restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1
+    volumes:
+      - security-logs:/app/logs
 
-  dashboard:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: llm-sentinel-dashboard
-    command: ["streamlit", "run", "dashboard/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
-    ports:
-      - "8501:8501"
-    environment:
-      - SENTINEL_API_URL=http://gateway:8000
-    depends_on:
-      - gateway
-    restart: unless-stopped
+volumes:
+  security-logs:

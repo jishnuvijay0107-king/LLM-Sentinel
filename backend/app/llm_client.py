@@ -41,8 +41,6 @@ def generate_llm_response(
                 "or set `GEMINI_API_KEY` in your environment."
             )
         primary_model = model or "gemini-3.8-flash"
-        if "2.5" in primary_model or "1.5" in primary_model:
-            primary_model = "gemini-3.8-flash"
 
         models_to_try = [primary_model, "gemini-flash-latest", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
         seen = set()
@@ -83,8 +81,6 @@ def generate_llm_response(
                 base_url="https://api.groq.com/openai/v1",
             )
             target_model = model or "qwen/qwen3.8-27b"
-            if "llama" in target_model.lower():
-                target_model = "qwen/qwen3.8-27b"
             resp = client.chat.completions.create(
                 model=target_model,
                 messages=[
@@ -216,18 +212,16 @@ def _generate_dynamic_response(prompt: str) -> str:
         )
     elif "firewall" in p_lower:
         return (
-            "A **Firewall** is a foundational perimeter security device that inspects and filters "
-            "network packets traversing boundaries between untrusted (Internet) and trusted (LAN) zones. "
-            "Types include packet-filtering, stateful inspection, and Application-Layer Web Application Firewalls (WAF)."
+            "A **firewall** acts like a checkpoint for a network. It checks incoming and outgoing "
+            "connections and allows traffic that matches its rules. For example, it can block an "
+            "unexpected connection from the internet while allowing your browser to open a website."
         )
     elif "france" in p_lower and "capital" in p_lower:
         return "The capital city of France is **Paris**."
     else:
         return (
-            f"### 🤖 AI Assistant Response\n\n"
-            f"Your request was inspected by **LLM-Sentinel**, verified clean, and passed to the downstream language model.\n\n"
-            f"**Regarding your prompt:** *\"{prompt.strip()}\"*\n\n"
-            f"This request conforms to all security policies and safety guardrails. "
-            f"To connect to live external models (such as **Google Gemini 2.5 Flash**, **Groq Llama 3.3**, or **OpenAI**), "
-            f"simply select the provider in the left sidebar and enter your API key!"
+            "This offline demo has example answers for HTTP, Python lists, "
+            "encryption, firewalls, and the capital of France. "
+            "Select a live provider in the sidebar to answer other questions. "
+            "No external model was called."
         )

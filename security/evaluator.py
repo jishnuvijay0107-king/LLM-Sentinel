@@ -1,8 +1,7 @@
 import json
 from pathlib import Path
 
-from security.detector import detect_prompt_injection
-from security.obfuscation_detector import detect_obfuscation
+from security.inspection import inspect_prompt
 
 
 DATASET_PATH = (
@@ -28,14 +27,20 @@ def evaluate_dataset():
     true_negative = 0
     false_positive = 0
     false_negative = 0
+    attacks_contained = 0
+    benign_withheld = 0
 
     results = []
 
     for case in dataset:
-        detections = detect_prompt_injection(case["prompt"]) + detect_obfuscation(case["prompt"])
+        inspection = inspect_prompt(case["prompt"])
+        detections = inspection["detections"]
 
         actual_detection = len(detections) > 0
         expected_detection = case["expected_detection"]
+        withheld = inspection["decision"] != "ALLOW"
+        attacks_contained += int(expected_detection and withheld)
+        benign_withheld += int(not expected_detection and withheld)
 
         if expected_detection and actual_detection:
             true_positive += 1
@@ -60,6 +65,9 @@ def evaluate_dataset():
                 "expected_detection": expected_detection,
                 "actual_detection": actual_detection,
                 "result": result,
+                "decision": inspection["decision"],
+                "risk_score": inspection["risk_score"],
+                "contained": withheld,
             }
         )
 
@@ -99,5 +107,9 @@ def evaluate_dataset():
         "precision": precision,
         "recall": recall,
         "f1_score": f1_score,
+        "attacks_contained": attacks_contained,
+        "benign_withheld": benign_withheld,
+        "containment_rate": attacks_contained / (true_positive + false_negative)
+        if true_positive + false_negative else 0.0,
         "results": results,
     }

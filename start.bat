@@ -1,29 +1,12 @@
 @echo off
-title LLM-Sentinel Launcher
-color 0b
-echo ============================================================
-echo   [SENTINEL] AI Security Gateway & Threat Interceptor
-echo ============================================================
-echo.
-
-if not exist ".venv\Scripts\activate.bat" (
-    echo [ERROR] Virtual environment not found at .venv\
-    echo Please create it first: python -m venv .venv
+cd /d "%~dp0"
+title Sentinel - AI message security
+if not exist ".venv\Scripts\python.exe" (
+    echo Create the environment first: python -m venv .venv
+    echo Then install dependencies: .venv\Scripts\python.exe -m pip install -r requirements.txt
     pause
     exit /b 1
 )
-
-echo [*] Activating virtual environment...
-call .venv\Scripts\activate.bat
-
-echo [*] Launching FastAPI Gateway on http://127.0.0.1:8001...
-start "Sentinel Gateway API" /B .venv\Scripts\uvicorn backend.app.main:app --host 127.0.0.1 --port 8001
-
-echo [*] Waiting for gateway to initialize...
-timeout /t 2 /nobreak >nul
-
-echo [*] Launching Cinematic SOC Dashboard on http://localhost:8501...
-start http://localhost:8501
-.venv\Scripts\streamlit run dashboard/app.py --server.port 8501 --server.headless true
-
-pause
+echo Sentinel is starting at http://127.0.0.1:8501
+echo Press Ctrl+C to stop the app.
+.venv\Scripts\python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8501

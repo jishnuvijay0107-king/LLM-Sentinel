@@ -7,8 +7,9 @@ and adversarial interception rates.
 import statistics
 import time
 import requests
+import os
 
-API_URL = "http://127.0.0.1:8001/api/v1/security/analyze"
+API_URL = os.getenv("SENTINEL_API_URL", "http://127.0.0.1:8501").rstrip("/") + "/api/v1/security/analyze"
 
 TEST_PROMPTS = [
     # Safe prompts
@@ -58,7 +59,7 @@ def run_benchmark(iterations_per_prompt: int = 5):
                 print(f"[ERROR] Request failed: {e}")
 
     if not latencies:
-        print("[!] No successful responses received. Is FastAPI running on port 8001?")
+        print("[!] No responses received. Check the Sentinel service and target URL.")
         return
 
     # Compute Statistics
@@ -80,8 +81,8 @@ def run_benchmark(iterations_per_prompt: int = 5):
     print(f"  • 99th Percentile (P99)    : {p99_lat:.2f} ms")
     print(f"  • Maximum Latency          : {max_lat:.2f} ms")
     print("-" * 65)
-    print("CONCLUSION: Sub-millisecond boundary firewall operational.")
-    print("Zero GPU latency penalty; deterministic CPU regex state machines verified.")
+    print("Latency includes HTTP transit, inspection, and logging. No model is called.")
+    print("These sample results do not establish real-world protection rates.")
     print("=" * 65)
 
 

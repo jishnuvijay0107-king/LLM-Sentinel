@@ -23,8 +23,9 @@ def _find_pattern(text: str, patterns: list[str]) -> str | None:
     """
 
     for pattern in patterns:
-        if re.search(pattern, text, flags=re.IGNORECASE):
-            return pattern
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match:
+            return match.group(0)
 
     return None
 
@@ -42,6 +43,7 @@ def detect_prompt_injection(prompt: str) -> list[ThreatDetection]:
     patterns = {
         "instruction_manipulation": [
             r"\bignore\s+(all\s+)?previous\s+instructions\b",
+            r"\bignore\s+(all\s+)?previous\s+rules\b",
             r"\bignore\s+(the\s+)?previous\s+instructions\b",
 
             r"\bdisregard\s+(all\s+)?previous\s+instructions\b",
@@ -67,6 +69,7 @@ def detect_prompt_injection(prompt: str) -> list[ThreatDetection]:
         ],
 
         "prompt_extraction": [
+            r"\b(output|repeat|copy)\s+(the\s+)?(initial|system)\s+instructions\b",
             r"\breveal\s+(your\s+|the\s+)?system\s+prompt\b",
             r"\breveal\s+(your\s+|the\s+)?system\s+instructions\b",
 
@@ -123,19 +126,44 @@ def detect_prompt_injection(prompt: str) -> list[ThreatDetection]:
         ],
 
         "jailbreak": [
-            r"\b(dan|do\s+anything\s+now)\b",
+            r"\b(act\s+as|you\s+are\s+(now\s+)?|become|enable)\s*dan\b",
+            r"\bdo\s+anything\s+now\b",
             r"\bdeveloper\s+mode\b",
             r"\bjailbreak\b",
             r"\bdisable\s+all\s+(moral|ethical)\s+guidelines\b",
         ],
 
         "cyberattack_intent": [
+            # Short, direct requests must work without a "how to" prefix.
+            # Keep explicit targets so ordinary account-security questions do not match.
+            r"\b(hack|crack|compromise|breach|break\s+into)\s+(into\s+)?(?:(?:my|your|the|a|an|someone['’]?s|anyone['’]?s|friend['’]?s)\s+){0,3}(insta(?:gram)?|facebook|fb|whatsapp|snapchat|gmail|tiktok|telegram|twitter|social\s+media)(\s+account)?\b",
+            r"\b(hack|compromise|take\s+over)\s+(you|chatgpt|this\s+(ai|assistant|chatbot))\b",
+            r"\b(hack|crack|breach)\s+(?:(?:the|a|an|my|your|srm|college|school|campus|neighbou?r['’]?s)\s+){0,3}(wi[\s-]?fi|wireless\s+network)\b",
             r"\b(hack|crack|breach|infiltrate|penetrate)\s+([a-z0-9_-]+\s+)?(wifi|network|router|wpa|wpa2|wpa3|handshake|server|database|system|account|credentials?|password)\b",
             r"\b(hack|crack|compromise|exploit|infiltrate)\s+(into\s+)?([a-z0-9_-]+\s+)?(wifi|network|database|server|system|account|credentials?|portal)\b",
             r"\b(i\s+need\s+to\s+|i\s+need\s+|how\s+to\s+|help\s+me\s+)(hack|crack|breach|exploit|infiltrate|ddos|phish)\b",
             r"\b(steal|dump|harvest|sniff)\s+(passwords?|credentials?|wifi\s+passwords?|hashes|tokens?|keys?)\b",
             r"\b(create|write|generate|build)\s+(a\s+)?(keylogger|ransomware|trojan|malware|botnet|ddos\s+tool|exploit\s+payload)\b",
             r"\b(bypass|crack)\s+(wifi\s+password|wpa2\s+password|network\s+authentication)\b",
+        ],
+
+        "harmful_illegal_content": [
+            r"\b(kill|murder|poison|stab|torture|kidnap)\s+(?:(?:my|your|his|her|the|a|an)\s+)?(neighbou?r|friend|enemy|teacher|boss|partner|wife|husband|child|father|mother|brother|sister|him|her|them)\b",
+            r"\b(how\s+to\s+)?(make|build|create|manufacture|assemble|synthesize|cook|prepare)\s+(a\s+)?(bomb|explosive|pipe\s*bomb|ied|molotov|dynamite|c4|grenade|boob\b|detonator|suicide\s*vest|landmine)\b",
+            r"\b(how\s+to\s+)?(make|build|construct|manufacture)\s+(a\s+)?(gun|firearm|ghost\s*gun|weapon|biological\s*weapon|chemical\s*weapon|dirty\s*bomb)\b",
+            r"\b(recipe|instructions|guide|formula)\s+(for|to\s+make)\s+(a\s+)?(bomb|explosive|pipe\s*bomb|ied|molotov|poison|ricin|cyanide)\b",
+            r"\b(synthesize|manufacture)\s+(ricin|anthrax|sarin|cyanide|mustard\s*gas|vx\s*nerve\s*agent)\b",
+            r"\b(how\s+to\s+)?(kill|murder|assassinate|strangle|poison|slaughter|stab|execute|harm|torture)\s+(a\s+|the\s+)?(person|preson\b|someone|human|individual|people|man|woman|child|body)\b",
+            r"\b(kill|murder|assassinate|poison)\s+(a\s+|the\s+)?(person|preson\b|someone|human|individual)\b",
+            r"\bhow\s+to\s+(hire|find)\s+(a\s+)?(hitman|contract\s*killer|assassin)\b",
+            r"\bways\s+to\s+(kill|murder)\s+(someone|a\s+person|people)\b",
+            r"\bhow\s+to\s+get\s+away\s+with\s+(murder|killing)\b",
+        ],
+
+        "financial_crime": [
+            r"\b(rob|burgle)\s+(a|the|my|your)\s+(bank|house|store|shop)\b",
+            r"\b(steal|launder)\s+(?:someone['’]?s\s+|other\s+people['’]?s\s+)?(money|credit\s+cards?|bank\s+details)\b",
+            r"\b(how\s+to|help\s+me|i\s+(?:want|need)\s+to)\s+(?:commit\s+fraud|forge\s+(?:a\s+)?signature|make\s+(?:a\s+)?fake\s+passport)\b",
         ],
     }
 
@@ -146,6 +174,8 @@ def detect_prompt_injection(prompt: str) -> list[ThreatDetection]:
         "policy_bypass": 0.90,
         "jailbreak": 0.95,
         "cyberattack_intent": 0.95,
+        "harmful_illegal_content": 0.95,
+        "financial_crime": 0.95,
     }
 
     for category, category_patterns in patterns.items():
@@ -157,27 +187,14 @@ def detect_prompt_injection(prompt: str) -> list[ThreatDetection]:
 
         if match:
 
-            # Avoid false positives when discussing educational cybersecurity defense
-            if (
-                category == "cyberattack_intent"
-                and (
-                    "protect" in text
-                    or "prevent" in text
-                    or "defend" in text
-                    or "ethical" in text
-                )
-            ):
-                continue
-
-            # Avoid false positives when a document is merely
-            # discussing previous instructions.
+            # A complete, bounded reference to outdated document instructions.
+            # A phrase elsewhere in an attack must never disable a category.
             if (
                 category == "instruction_manipulation"
-                and (
-                    "this article explains" in text
-                    or "this document explains" in text
-                    or "the article explains" in text
-                    or "the document explains" in text
+                and re.fullmatch(
+                    r"(?:this|the) (?:article|document) explains why you should "
+                    r"ignore previous instructions from an outdated document\.?",
+                    text,
                 )
             ):
                 continue

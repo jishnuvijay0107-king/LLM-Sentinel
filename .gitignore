@@ -14,7 +14,8 @@ __pycache__/
 !.env.example
 
 # Streamlit
-.streamlit/
+.streamlit/*
+!.streamlit/config.toml
 
 # Generated logs
 logs/

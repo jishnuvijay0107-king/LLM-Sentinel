@@ -32,6 +32,14 @@ def normalize_text(text: str) -> str:
 
     normalized = unicodedata.normalize("NFKC", text)
 
+    # Format characters must not split keywords during inspection. Keep the
+    # original for the separate obfuscation detector and provider request.
+    normalized = "".join(
+        char for char in normalized
+        if unicodedata.category(char) not in {"Cf", "Cc"}
+        or char in "\n\r\t"
+    )
+
     # Normalize line endings.
     normalized = normalized.replace("\r\n", "\n")
     normalized = normalized.replace("\r", "\n")

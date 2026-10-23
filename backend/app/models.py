@@ -86,9 +86,8 @@ class SecurityAnalysisResponse(BaseModel):
     )
 
 
-class GuardedChatRequest(BaseModel):
-    prompt: str = Field(..., min_length=1, max_length=10000)
-    provider: str = Field(default="builtin")
+class GuardedChatRequest(SecurityAnalysisRequest):
+    provider: Literal["builtin", "gemini", "groq", "openai", "ollama"] = "builtin"
     api_key: str | None = Field(default=None)
     model: str | None = Field(default=None)
 
@@ -102,3 +101,4 @@ class GuardedChatResponse(BaseModel):
     detections: list[ThreatDetectionResponse]
     ai_response: str
     latency_ms: float
+    total_latency_ms: float = 0.0

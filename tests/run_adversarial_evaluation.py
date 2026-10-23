@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from security.detector import detect_prompt_injection
+from security.inspection import inspect_prompt
 
 
 DATASET_PATH = (
@@ -21,9 +21,8 @@ def main():
     print("\n=== LLM-Sentinel Adversarial Evaluation ===\n")
 
     for case in dataset:
-        detections = detect_prompt_injection(case["prompt"])
-
-        actual_detection = len(detections) > 0
+        inspection = inspect_prompt(case["prompt"])
+        actual_detection = inspection["decision"] != "ALLOW"
         expected_detection = case["expected_detection"]
 
         passed = actual_detection == expected_detection
@@ -50,6 +49,8 @@ def main():
     print(f"Passed      : {correct}")
     print(f"Failed      : {incorrect}")
     print(f"Accuracy    : {accuracy:.2%}")
+    if incorrect:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

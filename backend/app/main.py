@@ -2,12 +2,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.app.security_api import router as security_router
 from backend.app.rate_limiter import limiter
+from backend.app.workspace_api import router as workspace_router
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -74,15 +78,15 @@ app.add_middleware(
 app.include_router(
     security_router
 )
+app.include_router(workspace_router)
+
+WEB_ROOT = Path(__file__).resolve().parents[2] / "dashboard" / "web"
+app.mount("/assets", StaticFiles(directory=WEB_ROOT), name="assets")
 
 
 @app.get("/")
 def root():
-    return {
-        "project": "LLM-Sentinel",
-        "status": "online",
-        "message": "LLM Security Gateway is running",
-    }
+    return FileResponse(WEB_ROOT / "index.html", headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/health")
